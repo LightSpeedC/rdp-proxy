@@ -109,7 +109,7 @@ var server = net.createServer(function onCliConn(cliSoc) {
     if (svrSoc) {
       svrSoc.destroy();
       svrQue = [];
-      svrSoc = null; // ???? 必要かな?
+      svrSoc = null;
     }
     else enq({cmd: 'destroy'});
   });

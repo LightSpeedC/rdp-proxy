@@ -1,0 +1,5 @@
+config = {
+  port: 3389,
+  proxy: 'localhost:13389',
+  other: 'localhost:8080',
+}

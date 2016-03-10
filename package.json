@@ -1,0 +1,29 @@
+{
+  "name": "rdp-proxy",
+  "version": "1.0.0",
+  "description": "RDP Proxy",
+  "main": "net-net.js",
+  "private": true,
+  "dependencies": {
+    "date-time-string": "0.0.9",
+    "log-manager": "0.0.10",
+    "log-writer": "0.0.9"
+  },
+  "keywords": [
+    "RDP",
+    "Proxy"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "LightSpeedC/rdp-proxy"
+  },
+  "homepage": "https://github.com/LightSpeedC/rdp-proxy#readme",
+  "bugs": {
+    "url": "https://github.com/LightSpeedC/rdp-proxy/issues"
+  },
+  "author": "LightSpeedC",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

@@ -1,12 +1,20 @@
 void function () {
 	'use strict';
+
 	var net  = require('net');
+
+	var cwd = process.cwd();
+	process.chdir(__dirname);
+	var log = require('log-manager').setWriter(new require('log-writer')('rdp-proxy-%s.log')).getLogger();
+	log.setLevel('trace');
+	log.info('cwd:', cwd);
+
 	var HTTP_PORT  = process.argv[2] || 3389;  // service port
 	var PROXY_HOST = process.argv[3] || 'localhost';  // proxy server host
 	var PROXY_PORT = process.argv[4] || 13389;    // proxy server port
 	var OTHER_PORT = process.argv[5] || 8080;     // other server port
 
-	if (!PROXY_HOST) return console.log('proxy server not found');
+	if (!PROXY_HOST) return log.warn('proxy server not found');
 
 	var server = net.createServer(function onCliConn(c) {
 		var cliMsgCnt = 0;
@@ -15,9 +23,7 @@ void function () {
 		if (remoteAddress.slice(0, 7) === '::ffff:')
 			remoteAddress = remoteAddress.slice(7);
 
-		console.log('%s cliSoc: connected from %s',
-			new Date().toLocaleTimeString(),
-			remoteAddress);
+		log.debug('cliSoc: connected from %s', remoteAddress);
 
 		var s = null;
 		var svrQue = [];
@@ -45,7 +51,7 @@ void function () {
 						s.destroy();
 						break;
 					default:
-						console.log('eh!? case error ' + elem.cmd);
+						log.warn('eh!? cmd case error ' + elem.cmd);
 						s.destroy();
 						break;
 				} // switch
@@ -66,20 +72,16 @@ void function () {
 				if (buff.length >= 2 && buff[0] === 0x03 && buff[1] === 0x00)
 					s = net.connect(PROXY_PORT, PROXY_HOST, function onSvrConn(err) {
 						if (err)
-							console.log('%s svrCon: %s (proxy)',
-								new Date().toLocaleTimeString(), err);
+							log.warn('svrCon: %s (proxy)', err);
 						flush();
-						console.log('%s svrCon: RDP',
-								new Date().toLocaleTimeString());
+						log.debug('svrCon: RDP');
 					});
 				else
 					s = net.connect(OTHER_PORT, PROXY_HOST, function onSvrConn(err) {
 						if (err)
-							console.log('%s svrCon: %s (other)',
-								new Date().toLocaleTimeString(), err);
+							log.warn('svrCon: %s (other)', err);
 						flush();
-						console.log('%s svrCon: Other "%s"',
-								new Date().toLocaleTimeString(),
+						log.debug('svrCon: Other "%s"',
 								buff.toString().split('\n')[0].trim());
 					});
 
@@ -91,7 +93,7 @@ void function () {
 				});
 				s.on('end', function () { c.end();});
 				s.on('error', function (err) {
-					console.log('%s svrSoc: %s', new Date().toLocaleTimeString(), err);
+					log.warn('svrSoc: %s', err);
 					c.destroy();
 				});
 
@@ -106,7 +108,7 @@ void function () {
 		});
 
 		c.on('error', function (err) {
-			console.log('%s cliSoc: %s', new Date().toLocaleTimeString(), err);
+			log.warn('cliSoc: %s', err);
 			if (s) {
 				s.destroy();
 				svrQue = [];
@@ -116,15 +118,16 @@ void function () {
 		});
 	}).listen(HTTP_PORT, function () {
 		process.on('uncaughtException', function (err) {
-			var msg1 = /\n    at exports._errnoException \(util.js:\d*:\d*\)\n    at TCP.onread \(net.js:\d*:\d*\)/;
-			console.log('uncExc %s', err.stack.replace(msg1, ''));
+			//var msg1 = /\n    at exports._errnoException \(util.js:\d*:\d*\)\n    at TCP.onread \(net.js:\d*:\d*\)/;
+			//log.error('uncExc %s', err.stack.replace(msg1, ''));
+			log.error('uncExc %s', err);
 		});
 	});
 
 	server.on('error', function onSvrErr(err) {
-		console.log('%s svrErr: %s', new Date().toLocaleTimeString(), err);
+		log.warn('svrErr: %s', err);
 	}); // server.on error
 
-	console.log('port forwarder started on port ' + HTTP_PORT +
+	log.info('port forwarder started on port ' + HTTP_PORT +
 						' -> ' + PROXY_HOST + ':' + PROXY_PORT);
 }();

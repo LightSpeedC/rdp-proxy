@@ -16,6 +16,10 @@ void function () {
 
 	if (!PROXY_HOST) return log.warn('proxy server not found');
 
+	function toHex2(n) {
+		return ('0' + n.toString(16)).substr(-2);
+	}
+
 	var server = net.createServer(function onCliConn(c) {
 		var cliMsgCnt = 0;
 
@@ -81,8 +85,14 @@ void function () {
 						if (err)
 							log.warn('svrCon: %s (other)', err);
 						flush();
-						log.debug('svrCon: Other "%s"',
-								buff.toString().split('\n')[0].trim());
+						try {
+							if (buff.length >= 4)
+								log.debug('svrCon: Other: ' +
+									toHex2(buff[0]) + ' ' +
+									toHex2(buff[1]) + ' ' +
+									toHex2(buff[2]) + ' ' +
+									toHex2(buff[3]) + '.');
+						} catch (e) {}
 					});
 
 				//s.pipe(c);
